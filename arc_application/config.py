@@ -10,7 +10,6 @@ class Config:
     DEBUG = False
     SECRET_KEY = os.getenv('SECRET_KEY', 'Botmantra@123@cfo_bridge')
     VERSION = "1.0.0"
-    PORT = 5002
 
 
 class DevelopmentConfig(Config):
@@ -22,7 +21,7 @@ class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test.db')
     DEBUG = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    PORT = 5002
+    PORT = 8000
 
 
 class ProductionConfig(Config):
@@ -32,6 +31,7 @@ class ProductionConfig(Config):
     """
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = ""
+    PORT = 8000
 
 
 config_by_name = dict(
