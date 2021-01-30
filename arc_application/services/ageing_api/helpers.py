@@ -134,14 +134,14 @@ def get_due_age_by_summary(seller_id, date):
     try:
         query = f"""
         SELECT 
-        SUM(amount_aging_0_30) AS amount_0_30,
-        SUM(amount_aging_31_60) AS amount_31_60,
-        SUM(amount_aging_61_90) AS amount_61_90,
-        SUM(amount_aging_91_120) AS amount_91_120,
-        SUM(amount_aging_121_180) AS amount_121_180,
-        SUM(amount_aging_181_270) AS amount_181_270,
-        SUM(amount_aging_271_360) AS amount_271_360,
-        SUM(amount_aging_361plus) AS amount_361_plus
+        SUM(amount_aging_0_30) AS days_0_30,
+        SUM(amount_aging_31_60) AS days_31_60,
+        SUM(amount_aging_61_90) AS days_61_90,
+        SUM(amount_aging_91_120) AS days_91_120,
+        SUM(amount_aging_121_180) AS days_121_180,
+        SUM(amount_aging_181_270) AS days_181_270,
+        SUM(amount_aging_271_360) AS days_271_360,
+        SUM(amount_aging_361plus) AS days_361_plus
 
         FROM
         arc_aging_summary
@@ -160,7 +160,7 @@ def get_due_age_by_summary(seller_id, date):
                 all_ageing_amount.append(
                     {
                         "name": key,
-                        "y": float(value)
+                        "y": float(value) if value else 0.0
                     }
                 )
 
