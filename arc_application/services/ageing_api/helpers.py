@@ -160,7 +160,7 @@ def get_due_age_by_summary(seller_id, date):
                 all_ageing_amount.append(
                     {
                         "name": key,
-                        "y": value
+                        "y": float(value)
                     }
                 )
 
