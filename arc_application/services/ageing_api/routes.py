@@ -1,6 +1,6 @@
 from flask import jsonify, current_app, request
 from ..ageing_api import ageing
-from .dummy_data import due_age_by_summary, card_data, total_out_standing
+from .helpers import get_card_data, get_total_out_standing, get_due_age_by_summary
 
 
 @ageing.route('/status')
@@ -16,55 +16,36 @@ def status_function():
     ), 200
 
 
-@ageing.route('/cards/<int:seller_id>')
-def get_dashboard(seller_id):
+@ageing.route('/cards/<int:seller_id>/<string:date>')
+def get_dashboard(seller_id, date):
     """ this function returns the dashboard for particular seller
 
     Args:
         seller_id (int): seller id_in iteger
+        date (str):yyyy-mm-dd
     """
-    if card_data.get("seller_id") == seller_id:
-        return jsonify(card_data), 200
-
-    return jsonify(
-        {
-            "error": "data not found",
-            "description": "seller does not exists"
-        }
-    ), 404
+    result = get_card_data(seller_id, date)
+    return result
 
 
-@ageing.route('/dueBySummary/<int:seller_id>')
-def due_age_by_summary_chart(seller_id):
+@ageing.route('/dueBySummary/<int:seller_id>/<string:date>')
+def due_age_by_summary_chart(seller_id, date):
     """this function returns due by summary for a seller
 
     Args:
         seller_id (int): seller id
     """
-    if due_age_by_summary.get("seller_id") == seller_id:
-        return jsonify(due_age_by_summary), 200
+    result = get_due_age_by_summary(seller_id, date)
 
-    return jsonify(
-        {
-            "error": "data not found",
-            "description": "seller does not exists"
-        }
-    ), 404
+    return result
 
 
-@ageing.route('/totalOutstanding/<int:seller_id>')
-def total_out_standing_chart(seller_id):
+@ageing.route('/totalOutstanding/<int:seller_id>/<string:date>')
+def total_out_standing_chart(seller_id, date):
     """returns total outstanding amount of top 5 customers
 
     Args:
         seller_id (int): seller id
     """
-    if total_out_standing.get("seller_id") == seller_id:
-        return jsonify(total_out_standing), 200
-
-    return jsonify(
-        {
-            "error": "data not found",
-            "description": "seller does not exists"
-        }
-    ), 404
+    result = get_total_out_standing(seller_id, date)
+    return result
