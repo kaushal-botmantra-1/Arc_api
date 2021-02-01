@@ -1,11 +1,6 @@
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-os.environ["DB_USER"] = "doadmin"
-os.environ["DB_PASSWORD"] = "vn1dzzs4o9r5jvhi"
-os.environ["DB_URL"] = "dev-faas-do-user-7830134-0.a.db.ondigitalocean.com"
-os.environ["DB_PORT"] = "25060"
-os.environ["DB_NAME"] = "cfo_faas"
 
 
 class Config:
