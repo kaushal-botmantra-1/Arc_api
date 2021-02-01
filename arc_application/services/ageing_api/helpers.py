@@ -1,23 +1,24 @@
 from arc_application import db
 from flask import jsonify
+from decimal import Decimal
 
 
 def get_card_data(seller_id, date):
     """
     this function retrieves card data for dashboard
-    #ARGS 
+    # ARGS
         seller_id (int) - id of seller
         date (string) yyyy-mm-dd
     """
     try:
         query = f"""
-        SELECT 
-        seller_name, 
+        SELECT
+        seller_name,
         SUM(amount_out_standing) AS total_receivables,
         SUM(amount_not_yet_due) AS not_yet_due
-        
+
         FROM arc_aging_summary
-        WHERE 
+        WHERE
         seller_code ={seller_id}
         AND
         as_on_date <= '{date}'
@@ -69,14 +70,14 @@ def get_card_data(seller_id, date):
 def get_total_out_standing(seller_id, date, limit=5):
     """
     this function retrieves total outstanding for top 5 customers
-    #ARGS 
+    # ARGS
         seller_id (int) - id of seller
         date (string) yyyy-mm-dd
     """
 
     try:
         query = f"""
-            SELECT 
+            SELECT
             amount_out_standing,
             seller_customer_name,
             seller_name,
@@ -84,7 +85,7 @@ def get_total_out_standing(seller_id, date, limit=5):
 
             FROM arc_aging_summary
 
-            WHERE 
+            WHERE
             seller_code ={seller_id}
             AND
             as_on_date <= '{date}'
@@ -98,9 +99,9 @@ def get_total_out_standing(seller_id, date, limit=5):
             for customer in result:
                 customer_data.append(
                     {
-                        "customer_name": customer.get("seller_customer_name"),
+                        "name": customer.get("seller_customer_name"),
                         "customer_code": customer.get("seller_customer_code"),
-                        "total_outstanding": float(customer.get("amount_out_standing"))
+                        "y": float(customer.get("amount_out_standing"))
                     }
                 )
             payload = {
@@ -126,14 +127,14 @@ def get_total_out_standing(seller_id, date, limit=5):
 def get_due_age_by_summary(seller_id, date):
     """
     this function retrieves total outstanding for all customers
-    #ARGS 
+    # ARGS
         seller_id (int) - id of seller
         date (string) yyyy-mm-dd
     """
 
     try:
         query = f"""
-        SELECT 
+        SELECT
         SUM(amount_aging_0_30) AS days_0_30,
         SUM(amount_aging_31_60) AS days_31_60,
         SUM(amount_aging_61_90) AS days_61_90,
@@ -145,8 +146,8 @@ def get_due_age_by_summary(seller_id, date):
 
         FROM
         arc_aging_summary
-        
-        WHERE 
+
+        WHERE
             seller_code ={seller_id}
             AND
             as_on_date <= '{date}'
@@ -177,6 +178,98 @@ def get_due_age_by_summary(seller_id, date):
             }
         ), 404
 
+    except Exception as e:
+        return jsonify({
+            "error": "Unknown",
+            "description": str(e)
+        }), 500
+
+
+def ageing_summary_report(seller_id, date):
+    """this function retrieves all data points for a paricular seller till date
+
+    Args:
+        seller_id (int): seller identity number
+        date (str): yyyy-mm-dd
+    """
+    try:
+
+        query = f"""
+        SELECT *
+        FROM
+            arc_aging_summary
+
+            WHERE
+                seller_code ={seller_id}
+                AND
+                as_on_date <= '{date}'
+        """
+        result = [dict(item) for item in db.engine.execute(query)]
+        if len(result) > 0:
+            for data in result:
+                for key, values in data.items():
+                    if isinstance(values, Decimal):
+                        data[key] = float(values)
+
+            payload = {
+                "seller_id": seller_id,
+                "data": result
+            }
+            return jsonify(payload)
+
+        return jsonify(
+            {
+                "error": "data not found",
+                "description": "No data exists for this particular query"
+            }
+        ), 404
+    except Exception as e:
+        print(e)
+        return jsonify({
+            "error": "Unknown",
+            "description": str(e)
+        }), 500
+
+
+def ageing_details_report(seller_id, date):
+    """this function retrieves all datapoints of ageing details for a prticular seller
+
+
+        Args:
+        seller_id (int): seller identity number
+        date (str): yyyy-mm-dd
+    """
+    try:
+
+        query = f"""
+        SELECT *
+        FROM
+            arc_aging_details
+
+            WHERE
+                seller_code ={seller_id}
+                AND
+                as_on_date <= '{date}'
+        """
+        result = [dict(item) for item in db.engine.execute(query)]
+        if len(result) > 0:
+            for data in result:
+                for key, values in data.items():
+                    if isinstance(values, Decimal):
+                        data[key] = float(values)
+
+            payload = {
+                "seller_id": seller_id,
+                "data": result
+            }
+            return jsonify(payload)
+
+        return jsonify(
+            {
+                "error": "data not found",
+                "description": "No data exists for this particular query"
+            }
+        ), 404
     except Exception as e:
         print(e)
         return jsonify({

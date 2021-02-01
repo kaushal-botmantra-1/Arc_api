@@ -1,6 +1,6 @@
 from flask import jsonify, current_app, request
 from ..ageing_api import ageing
-from .helpers import get_card_data, get_total_out_standing, get_due_age_by_summary
+from .helpers import *
 
 
 @ageing.route('/status')
@@ -46,6 +46,31 @@ def total_out_standing_chart(seller_id, date):
 
     Args:
         seller_id (int): seller id
+        date (str): date until which data is required
     """
     result = get_total_out_standing(seller_id, date)
     return result
+
+
+@ageing.route('/ageingSummary/<int:seller_id>/<string:date>')
+def ageing_summary_roprt(seller_id, date):
+    """return all the data fields for a seller
+
+    Args:
+        seller_id (int): 
+        date (str): date until which data is required
+    """
+    res = ageing_summary_report(seller_id, date)
+    return res
+
+
+@ageing.route('/ageingDetails/<int:seller_id>/<string:date>')
+def ageing_details_roprt(seller_id, date):
+    """return all the data fields for a seller
+
+    Args:
+        seller_id (int): 
+        date (str): date until which data is required
+    """
+    res = ageing_details_report(seller_id, date)
+    return res
