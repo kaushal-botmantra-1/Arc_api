@@ -1,6 +1,9 @@
 from arc_application import db
-from flask import jsonify
+from flask import jsonify, current_app, send_file
 from decimal import Decimal
+import pandas as pd
+import os
+from ..utils import random_string_generator
 
 
 def get_card_data(seller_id, date):
@@ -185,7 +188,7 @@ def get_due_age_by_summary(seller_id, date):
         }), 500
 
 
-def ageing_summary_report(seller_id, date):
+def ageing_summary_report(seller_id, date, download=False):
     """this function retrieves all data points for a paricular seller till date
 
     Args:
@@ -215,6 +218,8 @@ def ageing_summary_report(seller_id, date):
                 "seller_id": seller_id,
                 "data": result
             }
+            if download:
+                return payload
             return jsonify(payload)
 
         return jsonify(
@@ -224,14 +229,13 @@ def ageing_summary_report(seller_id, date):
             }
         ), 404
     except Exception as e:
-        print(e)
         return jsonify({
             "error": "Unknown",
             "description": str(e)
         }), 500
 
 
-def ageing_details_report(seller_id, date):
+def ageing_details_report(seller_id, date, download=False):
     """this function retrieves all datapoints of ageing details for a prticular seller
 
 
@@ -262,6 +266,9 @@ def ageing_details_report(seller_id, date):
                 "seller_id": seller_id,
                 "data": result
             }
+
+            if download:
+                return payload
             return jsonify(payload)
 
         return jsonify(
@@ -272,6 +279,60 @@ def ageing_details_report(seller_id, date):
         ), 404
     except Exception as e:
         print(e)
+        return jsonify({
+            "error": "Unknown",
+            "description": str(e)
+        }), 500
+
+
+def download_ageing_summry(seller_id, date):
+    """this function retrieves all data points for a paricular seller till date and saves it in  excel file 
+
+    Args:
+        seller_id (int): seller identity number
+        date (str): yyyy-mm-dd
+    """
+    try:
+        result = ageing_summary_report(seller_id, date, download=True)
+        if isinstance(result, dict):
+            if result.get("data"):
+                data_to_write = result.get("data")
+                dataframe_object = pd.DataFrame(data_to_write)
+                file_name = f"{date}-{random_string_generator(5)}-{seller_id}.xlsx"
+                file_path = os.path.join(
+                    current_app.config["AGEING_REPORTS"], file_name)
+                dataframe_object.to_excel(file_path)
+                return send_file(file_path, as_attachment=True)
+        else:
+            return result
+    except Exception as e:
+        return jsonify({
+            "error": "Unknown",
+            "description": str(e)
+        }), 500
+
+
+def download_ageing_details(seller_id, date):
+    """this function retrieves all data points for a paricular seller till date and saves it in  excel file 
+
+    Args:
+        seller_id (int): seller identity number
+        date (str): yyyy-mm-dd
+    """
+    try:
+        result = ageing_details_report(seller_id, date, download=True)
+        if isinstance(result, dict):
+            if result.get("data"):
+                data_to_write = result.get("data")
+                dataframe_object = pd.DataFrame(data_to_write)
+                file_name = f"{date}-{random_string_generator(5)}-{seller_id}.xlsx"
+                file_path = os.path.join(
+                    current_app.config["AGEING_REPORTS"], file_name)
+                dataframe_object.to_excel(file_path)
+                return send_file(file_path, as_attachment=True)
+        else:
+            return result
+    except Exception as e:
         return jsonify({
             "error": "Unknown",
             "description": str(e)

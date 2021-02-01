@@ -1,4 +1,4 @@
-from flask import jsonify, current_app, request
+from flask import jsonify, current_app, request, send_file
 from ..ageing_api import ageing
 from .helpers import *
 
@@ -53,7 +53,7 @@ def total_out_standing_chart(seller_id, date):
 
 
 @ageing.route('/ageingSummary/<int:seller_id>/<string:date>')
-def ageing_summary_roprt(seller_id, date):
+def ageing_summary_report_route(seller_id, date):
     """return all the data fields for a seller
 
     Args:
@@ -65,7 +65,7 @@ def ageing_summary_roprt(seller_id, date):
 
 
 @ageing.route('/ageingDetails/<int:seller_id>/<string:date>')
-def ageing_details_roprt(seller_id, date):
+def ageing_details_report_route(seller_id, date):
     """return all the data fields for a seller
 
     Args:
@@ -74,3 +74,59 @@ def ageing_details_roprt(seller_id, date):
     """
     res = ageing_details_report(seller_id, date)
     return res
+
+
+@ageing.route('/downloadAgeingSummary', methods=["POST"])
+def download_ageing_summary_report():
+    """return all the data fields for a seller
+
+    Args:
+        seller_id (int): 
+        date (str): date until which data is required
+    """
+    data = request.json
+    seller_id = data.get("seller_id")
+    date = data.get("date")
+    if seller_id and date:
+        if isinstance(seller_id, int) and isinstance(date, str):
+            res = download_ageing_summry(seller_id, date)
+            return res
+        else:
+            return jsonify({
+                "error": "invalid datatype",
+                "description": "please the the datatypes of values"
+            })
+
+    else:
+        return jsonify({
+            "error": "missing key",
+            "description": "either key is missing or it is spelled wrong"
+        })
+
+
+@ageing.route('/downloadAgeingDetails', methods=["POST"])
+def download_ageing_details_report():
+    """return all the data fields for a seller
+
+    Args:
+        seller_id (int): 
+        date (str): date until which data is required
+    """
+    data = request.json
+    seller_id = data.get("seller_id")
+    date = data.get("date")
+    if seller_id and date:
+        if isinstance(seller_id, int) and isinstance(date, str):
+            res = download_ageing_details(seller_id, date)
+            return res
+        else:
+            return jsonify({
+                "error": "invalid datatype",
+                "description": "please the the datatypes of values"
+            })
+
+    else:
+        return jsonify({
+            "error": "missing key",
+            "description": "either key is missing or it is spelled wrong"
+        })

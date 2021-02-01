@@ -22,7 +22,10 @@ class DevelopmentConfig(Config):
         os.environ.get("DB_URL")) + ":" + str(os.environ.get("DB_PORT")) + "/" + str(os.environ.get("DB_NAME"))
     DEBUG = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    PORT = 8000
+    PORT = 5000
+    HOST = "127.0.0.1"
+    AGEING_REPORTS = os.path.join(
+        os.getcwd(), 'arc_application', 'static', 'ageing_report')
 
 
 class ProductionConfig(Config):
@@ -31,8 +34,11 @@ class ProductionConfig(Config):
     It inherits the base config class
     """
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = ""
+    ENVIRONMENT = "Production"
+    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://" + str(os.environ.get("DB_USER")) + ":" + str(os.environ.get("DB_PASSWORD")) + "@" + str(
+        os.environ.get("DB_URL")) + ":" + str(os.environ.get("DB_PORT")) + "/" + str(os.environ.get("DB_NAME"))
     PORT = 8000
+    HOST = "0.0.0.0"
 
 
 config_by_name = dict(
